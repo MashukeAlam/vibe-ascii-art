@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const ASCII_CHARS = "@#SX/:].".split("").reverse();
 
 export default function App() {
   const [ascii, setAscii] = useState("");
   const [copied, setCopied] = useState(false);
+  const dropRef = useRef(null);
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+    e.preventDefault();
+    const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -76,8 +78,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-cyan-900 via-purple-900 to-black text-white font-sans p-4">
-      <h1 className="text-4xl font-extrabold mb-6 text-center drop-shadow-lg">
-        🖼️ Image to ASCII Art
+      <h1 className="text-xl font-extrabold mb-6 text-center drop-shadow-lg">
+        Image to ASCII Art
       </h1>
 
       <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-6rem)]">
@@ -88,7 +90,7 @@ export default function App() {
             className="cursor-pointer w-full text-center bg-white/20 border border-white/30 rounded-xl px-6 py-3
             hover:bg-white/40 transition duration-300 font-semibold"
           >
-            Upload Image
+            Click to Upload Image
             <input
               id="fileInput"
               type="file"
@@ -98,30 +100,40 @@ export default function App() {
             />
           </label>
 
-          
+          {/* Drag and Drop */}
+          <div
+            ref={dropRef}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleImageUpload}
+            className="hidden w-full text-center text-sm italic text-white/70 border-2 border-dashed border-white/30 rounded-xl p-8 transition duration-300 hover:border-white/60 hover:bg-white/10"
+          >
+            or drag & drop an image here
+          </div>
         </div>
 
         {/* Right panel - ASCII display */}
         <div className="flex justify-center items-center w-full md:w-2/3">
           {ascii ? (
             <div>
-            <pre className="w-full h-full overflow-auto font-mono text-[13px] leading-[13px] p-6 rounded-2xl bg-white/10 border border-purple-500/30 shadow-xl backdrop-blur-md text-white whitespace-pre">
+            <pre className="w-full h-full overflow-auto font-mono text-[13px] leading-[13px] p-3 rounded-2xl bg-white/10 border border-purple-500/30 shadow-xl backdrop-blur-md text-white whitespace-pre">
               {ascii}
             </pre>
-            <div className="flex gap-4 w-full pt-2">
+            <div className="flex gap-4 w-full mt-2">
             <button
               onClick={downloadTxt}
-              className="bg-cyan-200 hover:bg-cyan-600 text-black font-semibold py-2 px-4 rounded-lg shadow-lg transition duration-300"
+              className="cursor-pointer w-[50%] text-center bg-white/20 border border-white/30 rounded-xl px-6 py-3
+            hover:bg-white/40 transition duration-300 font-semibold"
             >
               Download TXT
             </button>
 
             <button
               onClick={copyToClipboard}
-              className={`font-semibold py-2 px-4 rounded-lg shadow-lg transition duration-300 ${
+              className={`cursor-pointer w-[50%] text-center border border-white/30 rounded-xl px-6 py-3
+             transition duration-300 font-semibold ${
                 copied
-                  ? "bg-green-400 text-black shadow-green-400/80"
-                  : "bg-cyan-200 hover:bg-cyan-600 text-black"
+                  ? "bg-green-400 shadow-green-400/80"
+                  : "bg-white/20 hover:bg-white/40"
               }`}
             >
               {copied ? "Copied!" : "Copy to Clipboard"}
